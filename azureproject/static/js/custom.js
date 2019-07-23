@@ -93,7 +93,9 @@ function processImage() {
 
         .done(function(data) {
             // Show formatted JSON on webpage.
-            alert("Description of the image: " + data.description.captions[0].text);
+            var desc = data.description.captions[0].text
+            alert("Description of the image: " + desc);
+            uploadFiles(desc);
         })
 
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -109,19 +111,6 @@ function processImage() {
 
 };
 
-// Blob
-const selectButton = document.getElementById("upload-btn");
-const fileInput = document.getElementById("input-img");
-const listButton = document.getElementById("list-button");
-const deleteButton = document.getElementById("delete-button");
-const status = document.getElementById("status");
-const fileList = document.getElementById("file-list");
-
-const reportStatus = message => {
-    status.innerHTML += `${message}<br/>`;
-    status.scrollTop = status.scrollHeight;
-}
-
 // Storage account info
 const accountName = "nfvazureprojectstorage";
 const sasString = "se=2019-07-31&sp=rwdlac&sv=2018-03-28&ss=b&srt=sco&sig=aNjfcZ3RMTHzWMbHdJcwShA22O3jcOYkhjcgPD13DXo%3D";
@@ -130,12 +119,13 @@ const containerURL = new azblob.ContainerURL(
     `https://${accountName}.blob.core.windows.net/${containerName}?${sasString}`,
     azblob.StorageURL.newPipeline(new azblob.AnonymousCredential));
 
+$(document).ready(function() {
+    listFile();
+});
+
 // List blobs
-const listFiles = async() => {
-    fileList.size = 0;
-    fileList.innerHTML = "";
+async function listFile() {
     try {
-        reportStatus("Retrieving file list...");
         let marker = undefined;
         do {
             const listBlobsResponse = await containerURL.listBlobFlatSegment(
@@ -143,59 +133,62 @@ const listFiles = async() => {
             marker = listBlobsResponse.nextMarker;
             const items = listBlobsResponse.segment.blobItems;
             for (const blob of items) {
-                fileList.size += 1;
-                fileList.innerHTML += `<option>${blob.name}</option>`;
+                for (var i = 0; i < 3; i++) {
+                    $('<div class="carousel-item">' +
+                        '<div class="card">' +
+                        '<img class="card-img-top" src="' +
+                        'https://' + accountName + '.blob.core.windows.net/' + containerName + '/' + blob.name + '" ' +
+                        'alt=' + blob.name + '>' +
+                        '<div class="card-body">' +
+                        '<h4 class="card-title"><b>' + blob.name + '</b></h4>' +
+                        '<p class="card-text"><i>Uploaded at ' + blob.properties.creationTime + '</i></p>' +
+                        '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>' +
+                        '</div></div></div>').appendTo('.carousel-inner');
+                }
             }
         } while (marker);
-        if (fileList.size > 0) {
-            reportStatus("Done.");
-        } else {
-            reportStatus("The container does not contain any files.");
-        }
+        $('.carousel-item').first().addClass('active');
+        $('#carousel1').carousel();
     } catch (error) {
-        reportStatus(error.body.message);
+        alert(error.body.message);
     }
 };
 
-listButton.addEventListener("click", listFiles);
-
 // Upload blobs
-const uploadFiles = async() => {
+async function uploadFiles(imgname) {
+    console.log(imgname);
     try {
-        reportStatus("Uploading files...");
         const promises = [];
+        const fileInput = document.getElementById("input-img");
         for (const file of fileInput.files) {
-            const blockBlobURL = azblob.BlockBlobURL.fromContainerURL(containerURL, file.name);
+            const blockBlobURL = azblob.BlockBlobURL.fromContainerURL(containerURL, imgname);
             promises.push(azblob.uploadBrowserDataToBlockBlob(
                 azblob.Aborter.none, file, blockBlobURL));
         }
         await Promise.all(promises);
-        reportStatus("Done.");
-        listFiles();
+        location.reload();
     } catch (error) {
-        reportStatus(error.body.message);
-    }
-}
-
-selectButton.addEventListener("click", uploadFiles);
-
-// Delete blobs
-const deleteFiles = async() => {
-    try {
-        if (fileList.selectedOptions.length > 0) {
-            reportStatus("Deleting files...");
-            for (const option of fileList.selectedOptions) {
-                const blobURL = azblob.BlobURL.fromContainerURL(containerURL, option.text);
-                await blobURL.delete(azblob.Aborter.none);
-            }
-            reportStatus("Done.");
-            listFiles();
-        } else {
-            reportStatus("No files selected.");
-        }
-    } catch (error) {
-        reportStatus(error.body.message);
+        alert(error.body.message);
     }
 };
 
-deleteButton.addEventListener("click", deleteFiles);
+// Delete blobs
+// const deleteFiles = async() => {
+//     try {
+//         if (fileList.selectedOptions.length > 0) {
+//             reportStatus("Deleting files...");
+//             for (const option of fileList.selectedOptions) {
+//                 const blobURL = azblob.BlobURL.fromContainerURL(containerURL, option.text);
+//                 await blobURL.delete(azblob.Aborter.none);
+//             }
+//             reportStatus("Done.");
+//             listFiles();
+//         } else {
+//             reportStatus("No files selected.");
+//         }
+//     } catch (error) {
+//         reportStatus(error.body.message);
+//     }
+// };
+
+// deleteButton.addEventListener("click", deleteFiles);
