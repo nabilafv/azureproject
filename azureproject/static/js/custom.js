@@ -132,25 +132,31 @@ async function listFile() {
                 azblob.Aborter.none, marker);
             marker = listBlobsResponse.nextMarker;
             const items = listBlobsResponse.segment.blobItems;
+            var num = 0;
             for (const blob of items) {
                 $('<div class="carousel-item">' +
                     '<div class="card">' +
                     '<img class="card-img-top" src="' +
                     'https://' + accountName + '.blob.core.windows.net/' + containerName + '/' + blob.name + '" ' +
-                    'alt=' + blob.name + '>' +
+                    'alt="' + blob.name + '">' +
                     '<div class="card-body">' +
                     '<h4 class="card-title"><b>' + blob.name + '</b></h4>' +
                     '<p class="card-text"><i>Uploaded at ' + blob.properties.creationTime + '</i></p>' +
-                    '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>' +
+                    '<button type="button" id="del-btn" class="btn btn-primary" onclick="deleteFiles()">DELETE</button>' +
                     '</div></div></div>').appendTo('.carousel-inner');
+                $('<li style="display: none;" data-target="#carousel1" data-slide-to="' + num + '" data-value="' + blob.name + '"></li>').appendTo('.carousel-indicators');
+                num += 1;
             }
         } while (marker);
         $('.carousel-item').first().addClass('active');
+        $('.carousel-indicators > li').first().addClass('active');
         $('#carousel1').carousel();
     } catch (error) {
         alert(error.body.message);
     }
 };
+
+// '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>'
 
 // Upload blobs
 async function uploadFiles(imgname) {
@@ -170,22 +176,13 @@ async function uploadFiles(imgname) {
 };
 
 // Delete blobs
-// const deleteFiles = async() => {
-//     try {
-//         if (fileList.selectedOptions.length > 0) {
-//             reportStatus("Deleting files...");
-//             for (const option of fileList.selectedOptions) {
-//                 const blobURL = azblob.BlobURL.fromContainerURL(containerURL, option.text);
-//                 await blobURL.delete(azblob.Aborter.none);
-//             }
-//             reportStatus("Done.");
-//             listFiles();
-//         } else {
-//             reportStatus("No files selected.");
-//         }
-//     } catch (error) {
-//         reportStatus(error.body.message);
-//     }
-// };
-
-// deleteButton.addEventListener("click", deleteFiles);
+async function deleteFiles() {
+    try {
+        var ele = $('#carousel1 .carousel-indicators li.active');
+        const blobURL = azblob.BlobURL.fromContainerURL(containerURL, ele.data('value'));
+        await blobURL.delete(azblob.Aborter.none);
+        location.reload();
+    } catch (error) {
+        alert(error.body.message);
+    }
+};
