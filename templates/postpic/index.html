@@ -6,7 +6,7 @@
             <div class="p-5 bg-white mx-auto mx-md-0 ml-md-auto col-10 col-md-9">
                 <h3 class="display-3 text-primary"><i><b>Abstract</b></i></h3>
                 <p class="mb-3 lead text-justify text-dark">
-                    A single page website that uses Bootstrap, jQuery, and Django for trying out Azure products which are; Azure App Service with Git, Azure Blob Storage, and Azure Cognitive Service.
+                    A single page website that uses Bootstrap, JavaScript, and Django for trying out Azure products which are; Azure App Service with Git, Azure Blob Storage, and Azure Cognitive Service.
                 </p>
                 <br>
                 <p class="text-primary"><em>*can only be accessed through a computer</em></p>
@@ -59,6 +59,19 @@
     </div>
 </div>
 
+<div class="container">
+    <button id="create-container-button">Create container</button>
+    <button id="delete-container-button">Delete container</button>
+    <button id="select-button">Select and upload files</button>
+    <input type="file" id="file-input" multiple style="display: none;" />
+    <button id="list-button">List files</button>
+    <button id="delete-button">Delete selected files</button>
+    <p><b>Status:</b></p>
+    <p id="status" style="height:160px; width: 593px; overflow: scroll;" />
+    <p><b>Files:</b></p>
+    <select id="file-list" multiple style="height:222px; width: 593px; overflow: scroll;" />
+</div>
+
 <!-- Pics Album -->
 <div id="picsAlbum-section" class="py-5 bg-dark">
     <div class="container">
@@ -70,26 +83,8 @@
                         <div class="carousel-item active">
                             <div class="card"><img class="card-img-top" src="{% static 'img/pika1.jpg' %}" alt="Card image cap">
                                 <div class="card-body">
-                                    <h4 class="card-title"><b>People waiting at a train station</b></h4>
-                                    <p class="card-text"><i>Uploaded at 8/9/20</i></p>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="card"><img class="card-img-top" src="{% static 'img/pika2.jpg' %}" alt="Card image cap">
-                                <div class="card-body">
-                                    <h4 class="card-title"><b>People waiting at an airport</b></h4>
-                                    <p class="card-text"><i>Uploaded at 5/10/20</i></p>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="card"><img class="card-img-top" src="{% static 'img/pika3.png' %}" alt="Card image cap">
-                                <div class="card-body">
-                                    <h4 class="card-title"><b>Pikachu doing an UwU face</b></h4>
-                                    <p class="card-text"><i>Uploaded at 2/12/20</i></p>
+                                    <!-- <h4 class="card-title"><b>People waiting at a train station</b></h4> -->
+                                    <!-- <p class="card-text"><i>Uploaded at 8/9/20</i></p> -->
                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>
                                 </div>
                             </div>
@@ -111,7 +106,7 @@
 </div>
 
 <!-- Contact -->
-<div id="contact-section" class="py-3 text-center">
+<!-- <div id="contact-section" class="py-3 text-center">
     <div class="container">
         <div class="row">
             <div class="mx-auto p-4 col-lg-7">
@@ -129,7 +124,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Delete Confirmation -->
 <div id="del-conf" class="modal fade" role="alert">

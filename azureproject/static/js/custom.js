@@ -109,3 +109,122 @@ function processImage() {
     reader.readAsDataURL(file);
 
 };
+
+// Blob
+const createContainerButton = document.getElementById("create-container-button");
+const deleteContainerButton = document.getElementById("delete-container-button");
+const selectButton = document.getElementById("select-button");
+const fileInput = document.getElementById("file-input");
+const listButton = document.getElementById("list-button");
+const deleteButton = document.getElementById("delete-button");
+const status = document.getElementById("status");
+const fileList = document.getElementById("file-list");
+
+const reportStatus = message => {
+    status.innerHTML += `${message}<br/>`;
+    status.scrollTop = status.scrollHeight;
+}
+
+// Add your storage account info
+const accountName = "nfvazureprojectstorage";
+const sasString = "se=2019-07-31&sp=rwdlac&sv=2018-03-28&ss=b&srt=sco&sig=aNjfcZ3RMTHzWMbHdJcwShA22O3jcOYkhjcgPD13DXo%3D";
+const containerName = "testcontainer";
+const containerURL = new azblob.ContainerURL(
+    `https://${accountName}.blob.core.windows.net/${containerName}?${sasString}`,
+    azblob.StorageURL.newPipeline(new azblob.AnonymousCredential));
+
+
+// Create and delete a storage container
+const createContainer = async() => {
+    try {
+        reportStatus(`Creating container "${containerName}"...`);
+        await containerURL.create(azblob.Aborter.none);
+        reportStatus(`Done.`);
+    } catch (error) {
+        reportStatus(error.body.message);
+    }
+};
+
+const deleteContainer = async() => {
+    try {
+        reportStatus(`Deleting container "${containerName}"...`);
+        await containerURL.delete(azblob.Aborter.none);
+        reportStatus(`Done.`);
+    } catch (error) {
+        reportStatus(error.body.message);
+    }
+};
+
+createContainerButton.addEventListener("click", createContainer);
+deleteContainerButton.addEventListener("click", deleteContainer);
+
+// List blobs
+const listFiles = async() => {
+    fileList.size = 0;
+    fileList.innerHTML = "";
+    try {
+        reportStatus("Retrieving file list...");
+        let marker = undefined;
+        do {
+            const listBlobsResponse = await containerURL.listBlobFlatSegment(
+                azblob.Aborter.none, marker);
+            marker = listBlobsResponse.nextMarker;
+            const items = listBlobsResponse.segment.blobItems;
+            for (const blob of items) {
+                fileList.size += 1;
+                fileList.innerHTML += `<option>${blob.name}</option>`;
+            }
+        } while (marker);
+        if (fileList.size > 0) {
+            reportStatus("Done.");
+        } else {
+            reportStatus("The container does not contain any files.");
+        }
+    } catch (error) {
+        reportStatus(error.body.message);
+    }
+};
+
+listButton.addEventListener("click", listFiles);
+
+// Upload blobs
+const uploadFiles = async() => {
+    try {
+        reportStatus("Uploading files...");
+        const promises = [];
+        for (const file of fileInput.files) {
+            const blockBlobURL = azblob.BlockBlobURL.fromContainerURL(containerURL, file.name);
+            promises.push(azblob.uploadBrowserDataToBlockBlob(
+                azblob.Aborter.none, file, blockBlobURL));
+        }
+        await Promise.all(promises);
+        reportStatus("Done.");
+        listFiles();
+    } catch (error) {
+        reportStatus(error.body.message);
+    }
+}
+
+selectButton.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", uploadFiles);
+
+// Delete blobs
+const deleteFiles = async() => {
+    try {
+        if (fileList.selectedOptions.length > 0) {
+            reportStatus("Deleting files...");
+            for (const option of fileList.selectedOptions) {
+                const blobURL = azblob.BlobURL.fromContainerURL(containerURL, option.text);
+                await blobURL.delete(azblob.Aborter.none);
+            }
+            reportStatus("Done.");
+            listFiles();
+        } else {
+            reportStatus("No files selected.");
+        }
+    } catch (error) {
+        reportStatus(error.body.message);
+    }
+};
+
+deleteButton.addEventListener("click", deleteFiles);
