@@ -133,18 +133,16 @@ async function listFile() {
             marker = listBlobsResponse.nextMarker;
             const items = listBlobsResponse.segment.blobItems;
             for (const blob of items) {
-                for (var i = 0; i < 3; i++) {
-                    $('<div class="carousel-item">' +
-                        '<div class="card">' +
-                        '<img class="card-img-top" src="' +
-                        'https://' + accountName + '.blob.core.windows.net/' + containerName + '/' + blob.name + '" ' +
-                        'alt=' + blob.name + '>' +
-                        '<div class="card-body">' +
-                        '<h4 class="card-title"><b>' + blob.name + '</b></h4>' +
-                        '<p class="card-text"><i>Uploaded at ' + blob.properties.creationTime + '</i></p>' +
-                        '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>' +
-                        '</div></div></div>').appendTo('.carousel-inner');
-                }
+                $('<div class="carousel-item">' +
+                    '<div class="card">' +
+                    '<img class="card-img-top" src="' +
+                    'https://' + accountName + '.blob.core.windows.net/' + containerName + '/' + blob.name + '" ' +
+                    'alt=' + blob.name + '>' +
+                    '<div class="card-body">' +
+                    '<h4 class="card-title"><b>' + blob.name + '</b></h4>' +
+                    '<p class="card-text"><i>Uploaded at ' + blob.properties.creationTime + '</i></p>' +
+                    '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#del-conf">DELETE</button>' +
+                    '</div></div></div>').appendTo('.carousel-inner');
             }
         } while (marker);
         $('.carousel-item').first().addClass('active');
@@ -156,7 +154,6 @@ async function listFile() {
 
 // Upload blobs
 async function uploadFiles(imgname) {
-    console.log(imgname);
     try {
         const promises = [];
         const fileInput = document.getElementById("input-img");
