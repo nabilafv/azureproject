@@ -94,7 +94,6 @@ function processImage() {
         .done(function(data) {
             // Show formatted JSON on webpage.
             alert("Description of the image: " + data.description.captions[0].text);
-            location.reload();
         })
 
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -111,10 +110,8 @@ function processImage() {
 };
 
 // Blob
-const createContainerButton = document.getElementById("create-container-button");
-const deleteContainerButton = document.getElementById("delete-container-button");
-const selectButton = document.getElementById("select-button");
-const fileInput = document.getElementById("file-input");
+const selectButton = document.getElementById("upload-btn");
+const fileInput = document.getElementById("input-img");
 const listButton = document.getElementById("list-button");
 const deleteButton = document.getElementById("delete-button");
 const status = document.getElementById("status");
@@ -125,38 +122,13 @@ const reportStatus = message => {
     status.scrollTop = status.scrollHeight;
 }
 
-// Add your storage account info
+// Storage account info
 const accountName = "nfvazureprojectstorage";
 const sasString = "se=2019-07-31&sp=rwdlac&sv=2018-03-28&ss=b&srt=sco&sig=aNjfcZ3RMTHzWMbHdJcwShA22O3jcOYkhjcgPD13DXo%3D";
-const containerName = "testcontainer";
+const containerName = "azureprojectcontainer";
 const containerURL = new azblob.ContainerURL(
     `https://${accountName}.blob.core.windows.net/${containerName}?${sasString}`,
     azblob.StorageURL.newPipeline(new azblob.AnonymousCredential));
-
-
-// Create and delete a storage container
-const createContainer = async() => {
-    try {
-        reportStatus(`Creating container "${containerName}"...`);
-        await containerURL.create(azblob.Aborter.none);
-        reportStatus(`Done.`);
-    } catch (error) {
-        reportStatus(error.body.message);
-    }
-};
-
-const deleteContainer = async() => {
-    try {
-        reportStatus(`Deleting container "${containerName}"...`);
-        await containerURL.delete(azblob.Aborter.none);
-        reportStatus(`Done.`);
-    } catch (error) {
-        reportStatus(error.body.message);
-    }
-};
-
-createContainerButton.addEventListener("click", createContainer);
-deleteContainerButton.addEventListener("click", deleteContainer);
 
 // List blobs
 const listFiles = async() => {
@@ -205,8 +177,7 @@ const uploadFiles = async() => {
     }
 }
 
-selectButton.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", uploadFiles);
+selectButton.addEventListener("click", uploadFiles);
 
 // Delete blobs
 const deleteFiles = async() => {
